@@ -1,39 +1,73 @@
-const path = require('path');
-const express = require('express');
-const session = require('express-session');
-const exphbs = require('express-handlebars');
-const helpers = require('./utils/helpers');
+Skip to content
+Why GitHub ?
+  Team
+Enterprise
+Explore
+Marketplace
+Pricing
+Search
+Sign in
+  Sign up
+LohasOT
+  /
+  TechBlog
+Public
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+TechBlog / server.js /
+@LohasOT
+LohasOT getting assets
+Latest commit f4f6357 yesterday
+History
+1 contributor
+43 lines(32 sloc)  1.01 KB
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+require('dotenv').config()
 
-const sequelize = require('./config/config');
-const SequelizeStore = require('connect-session-sequelize')(session.Store);
+const express = require('express')
+const { join } = require('path')
 
-const sess = {
-  secret: 'Super secret secret',
-  cookie: {},
-  resave: false,
-  saveUninitialized: true,
-  store: new SequelizeStore({
-    db: sequelize
-  })
-};
+const passport = require('passport')
+const { User, Post, Note } = require('./models')
+const { Strategy: JWTStrategy, ExtractJwt } = require('passport-jwt')
 
-app.use(session(sess));
+const app = express()
 
-const hbs = exphbs.create({ helpers });
+app.use(express.static(join(__dirname, 'public')))
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
-app.engine('handlebars', hbs.engine);
-app.set('view engine', 'handlebars');
+app.use(passport.initialize())
+app.use(passport.session())
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
+passport.use(User.createStrategy())
 
-app.use(require('./controllers/'));
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}!`);
-  sequelize.sync({ force: false });
-});
+passport.use(new JWTStrategy({
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.SECRET
+}, async function ({ id }, cb) {
+  try {
+    const user = await User.findOne({ where: { id }, include: [Post, Note] })
+    cb(null, user)
+  } catch (err) {
+    cb(err, null)
+  }
+}))
+
+app.use(require('./routes'))
+
+async function init() {
+  await require('./db').sync()
+  app.listen(process.env.PORT || 3000)
+}
+
+init()
