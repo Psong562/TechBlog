@@ -1,33 +1,3 @@
-Skip to content
-Why GitHub ?
-  Team
-Enterprise
-Explore
-Marketplace
-Pricing
-Search
-Sign in
-  Sign up
-LohasOT
-  /
-  TechBlog
-Public
-Code
-Issues
-Pull requests
-Actions
-Projects
-Wiki
-Security
-Insights
-TechBlog / server.js /
-@LohasOT
-LohasOT getting assets
-Latest commit f4f6357 yesterday
-History
-1 contributor
-43 lines(32 sloc)  1.01 KB
-
 require('dotenv').config()
 
 const express = require('express')
