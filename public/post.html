@@ -36,44 +36,175 @@
       <h1 class="display-4">Tech Blog</h1>
       <p class="lead">This is a blog app where you can talk about Tech anytime, anywhere.</p>
       <hr class="my-4">
-      <p class="lead">Welcome Back <span id="username">johndoe</span>!</p>
     </div>
-    <div id="posts" class="row"></div>
+    <div id="posts" class="row">
+    </div>
+    <div id="comments" class="row"></div>
+
+    <div class="row">
+      <form>
+        <div class="mb-3">
+          <h3>Add a Comment</h3>
+          <!-- <label for="title" class="form-label">Title</label>
+          <input type="text" class="form-control" id="title"> -->
+        </div>
+        <div class="mb-3">
+          <label for="body" class="form-label">Body</label>
+          <textarea class="form-control" name="body" id="body" cols="30" rows="10"></textarea>
+        </div>
+        <button id="comment" type="submit" class="btn btn-primary">Add Comment</button>
+      </form>
+    </div>
+
+
+
   </div>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
     crossorigin="anonymous"></script>
   <script>
-     let postId = localStorage.getItem('postId')
-      axios.get(`/api/posts/${postId}`, {
+    const username = localStorage.getItem('username')
+    let postId = localStorage.getItem('id')
+    axios.get(`/api/posts/${postId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(res => {
+        console.log(res)
+        let post = res.data
+        let postElem = document.createElement('div')
+        postElem.innerHTML = `
+          <div class="row bg-light p-5 rounded-md mb-2 mt-2">
+            <h1>Title: ${post.title}</h1>
+            <p class="lead">${post.body}</p>
+            <h6> posted by: ${post.User.username} <h6>
+            <hr class="my-4">
+          </div>
+        `
+
+        document.getElementById('posts').append(postElem)
+
+      })
+
+
+function getComments() {
+      axios.get(`/api/notes/${postId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        .then(res => {
+              console.log(res)
+              let comment = res.data
+              
+              console.log(username)
+              console.log(comment)
+
+              comment.forEach(notes => {
+                console.log(notes)
+                let commentElem = document.createElement('div')
+                commentElem.innerHTML = `
+                <div class="row bg-light p-5 rounded-md mb-2 mt-2">
+            <h4>${notes.body}</h4>
+            <p class="lead">posted by: ${notes.User.username} on ${notes.User.createdAt.slice(0, -14)}</p>
+            <hr class="my-4">
+            </div>
+            <button id="deleteComment" class="btn btn-dark btn-sm" data-postid="${notes.id}">Delete Comment</button>
+          `
+                document.getElementById('comments').append(commentElem)
+
+                document.addEventListener('click', event => {
+                if (event.target.className === 'btn btn-dark btn-sm' && username === `${notes.User.username}`) {
+                  const index = parseInt(event.target.dataset.postid)
+                  console.log(index)
+                  axios.delete(`./api/notes/${index}`, {
+                    headers: {
+                      'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                  })
+                    .then(() => {
+
+                      console.log(event.target.parentNode)
+                      event.target.parentNode.innerHTML = ''
+
+                      console.log('deleted')
+                    })
+                    .catch(err => console.log('unable to delete'))
+                }
+              })
+
+
+           
+              })
+
+            })
+          }
+
+
+
+
+    function createComment() {
+      let newComment = {
+        body: document.getElementById('body').value,  
+        pid: postId
+      }
+      axios.post('/api/notes', newComment, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       })
         .then(res => {
           console.log(res)
-          let post = res.data
-          let postElem = document.createElement('div')
-          postElem.innerHTML = `
-        <h1> ${post.title} </h1>
-        <h3> ${post.body} <h3>
-        `
-          document.getElementById('post').append(postElem)
-
-          post.notes.forEach(note => {
-            console.log(note)
-
-            let noteElem = document.createElement('div')
-            noteElem.innerHTML = `
-          ${note.body}
-          
-          `
-            document.getElementById('comments').append(noteElem)
-          })
-
         })
+    }
+
+     
+
+
+    document.getElementById('comment').addEventListener('click', async function (event) {
+      event.preventDefault()
+      createComment()
+      getComments()
+      location.reload()
+    })
+
+    getComments()
+
+
+     async function logoutUser() {
+        localStorage.removeItem('username')
+        localStorage.removeItem('token')
+        location = '/login.html'
+      }
+      document.getElementById('logout').addEventListener('click', logoutUser)
+
+
+
+     function timedOut() {
+        window.setTimeout(function () {
+          localStorage.removeItem('token')
+          // Move to a new location or you can do something else
+          location = "/login.html";
+        }, 300000);
+      }
+      timedOut()
+
+
+
+
+
+
+
+
   </script>
+
+
+
+
+
+
 </body>
 
 </html>

@@ -64,6 +64,7 @@
       localStorage.removeItem('token')
       location = '/login.html'
     }
+  
 
     async function getPosts() {
       try {
@@ -89,16 +90,25 @@
       return post
     }
 
-    async function renderPost({ title, body, User: { username } }) {
+    async function renderPost({id, title, body, User: { username } }) {
       const postElem = document.createElement('div')
       postElem.innerHTML = `
           <div class="row bg-light p-5 rounded-md mb-2 mt-2">
-            <h3>${title}</h3>
+            <h3 class="goToPost" data-postid="${id}">${title}</h3>
             <p class="lead"><i>posted by ${username}</i></p>
             <p class="lead">${body}</p>
             <hr class="my-4">
           </div>
         `
+        document.addEventListener('click', event => {
+        const index = parseInt(event.target.dataset.postid)
+        if (event.target.className === 'goToPost' && index == id) {
+          console.log('ping')
+          localStorage.setItem('id', event.target.dataset.postid)
+          location = '/post.html'
+        }
+      })
+
       document.getElementById('posts').prepend(postElem)
     }
 
@@ -124,6 +134,8 @@
 
       renderPost({ ...post, User: { username: localStorage.getItem('username') } })
     })
+
+     
 
     document.getElementById('logout').addEventListener('click', logoutUser)
 

@@ -4,7 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "seed": "node seeders"
   },
   "repository": {
     "type": "git",
@@ -17,13 +19,13 @@
   },
   "homepage": "https://github.com/coding-boot-camp/module-14-project-mvc#readme",
   "dependencies": {
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1",
-    "mysql2": "^2.0.1",
-    "passport": "^0.5.2",
+    "mysql2": "^2.3.3",
+    "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local-sequelize": "^0.9.0",
-    "sequelize": "^5.21.2"
+    "sequelize": "^6.12.1"
   }
 }
