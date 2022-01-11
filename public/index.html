@@ -98,12 +98,13 @@
             <h3 class="goToPost" data-postid="${id}">${title}</h3>
             <p><i>posted by ${username} on ${createdAt.slice(0, -14)} </i></p>
             <p class="lead">${body}</p>
+            <button class="btn btn-dark btn-sm" data-postid="${id}">Go to post</button>
             <hr class="my-4">
           </div>
         `
         document.addEventListener('click', event => {
         const index = parseInt(event.target.dataset.postid)
-        if (event.target.className === 'goToPost' && index == id) {
+        if (event.target.className === 'btn btn-dark btn-sm' && index == id) {
           console.log('ping')
           localStorage.setItem('id', event.target.dataset.postid)
           location = '/post.html'
