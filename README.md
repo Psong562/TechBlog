@@ -10,6 +10,7 @@
   ## Description
 
   Blog app used to talk about tech any time anywhere.
+  Check it out here : https://techbloganywhere.herokuapp.com/login.html
 
   ## Installation
 
