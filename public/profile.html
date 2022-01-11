@@ -13,7 +13,7 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Tech Blog</a>
+      <a class="navbar-brand" href="index.html">Tech Blog</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -38,7 +38,17 @@
       <hr class="my-4">
       <p class="lead">Posts by <span id="username">johndoe</span></p>
     </div>
-    <div id="posts" class="row"></div>
+    <div class="row justify-content-between">
+      <div class="col-sm-12 col-md-5"><p class="lead text-center">Recent Post</p></div>
+      <div class="col-sm-12 col-md-5"><p class="lead text-center">Recent Comments</p></div>
+      
+  </div>
+    <div class="row justify-content-between">
+        
+        <div id="posts" class="col-sm-12 col-md-5"></div>
+        <div id="comments" class="col-sm-12 col-md-5"></div>
+        
+      </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -59,6 +69,7 @@
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         })
+        console.log(user)
         return user
 
       } catch (err) {
@@ -66,23 +77,93 @@
       }
     }
 
-    async function renderPost({ title, body }) {
+    async function renderPost({ title, body, createdAt, id }) {
       const postElem = document.createElement('div')
       postElem.innerHTML = `
               <div class="row bg-light p-5 rounded-md mb-2 mt-2">
                 <h3>${title}</h3>
                 <p class="lead">${body}</p>
+                <p>posted at ${createdAt.slice(0, -14)}</p>
                 <hr class="my-4">
               </div>
+              <button id="deleteComment" class="btn btn-dark btn-sm" data-postid="${id}">Delete Post</button>
+              <hr>
             `
       document.getElementById('posts').prepend(postElem)
+      document.addEventListener('click', event => {
+        if (event.target.className === 'btn btn-dark btn-sm') {
+          const index = parseInt(event.target.dataset.postid)
+          console.log(index)
+          axios.delete(`./api/posts/${index}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          })
+            .then(() => {
+
+              console.log('deleted')
+            })
+            .catch(err => console.log(err))
+        }
+      })
     }
+
+
+
+
+    async function renderComment({ body, createdAt, id }) {
+      const commentElem = document.createElement('div')
+      commentElem.innerHTML = `
+              <div class="row bg-light p-5 rounded-md mb-2 mt-2">
+                
+                <p class="lead">${body}</p>
+                <p>created at ${createdAt.slice(0, -14)}</p>
+                
+                <hr class="my-4">
+                </div>
+                <button id="deleteComment" class="btn btn-dark btn-sm" data-postid="${id}">Delete Comment</button>
+              <hr>
+            `
+      document.getElementById('comments').prepend(commentElem)
+       document.addEventListener('click', event => {
+        if (event.target.className === 'btn btn-dark btn-sm') {
+          const index = parseInt(event.target.dataset.postid)
+          console.log(index)
+          axios.delete(`./api/notes/${index}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          })
+            .then(() => {
+
+              console.log('deleted')
+            })
+            .catch(err => console.log(err))
+        }
+      })
+    }
+
+
+
+
+
+
+
+
+async function renderComments() {
+  const { notes } = await getProfile()
+
+  notes.forEach(note => renderComment(note))
+}
+
+
 
     async function renderPosts() {
       const { posts } = await getProfile()
 
       posts.forEach(post => renderPost(post))
     }
+
 
     async function renderUsername() {
       const username = localStorage.getItem('username')
@@ -94,6 +175,17 @@
 
     renderPosts()
     renderUsername()
+    renderComments()
+
+
+     function timedOut() {
+        window.setTimeout(function () {
+          localStorage.removeItem('token')
+          // Move to a new location or you can do something else
+          location = "/login.html";
+        }, 300000);
+      }
+      timedOut()
   </script>
 </body>
 
